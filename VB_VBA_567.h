@@ -1,7 +1,7 @@
 /**
- * VB5-6, VBA6-7 types define
+ * VB5-6, VBA6-7 types define, export functions prototype
  * Import to IDA/Ghidra to analyze VB/VBA binaries
- * RE, analyze, collect, define by HTC - VinCSS (a member of Vingroup)
+ * RE, analyze, collect, rewrite by HTC (TQN)
  * Beerware licenses :D
  */
 
@@ -31,7 +31,7 @@ extern "C" {
 
 // VB/VBA error code = Err.Number and Err.Description
 // It is input parameter for VB/VBA internal function EbRaiseExceptionCode
-enum VBAErrorCode
+enum VBA_ErrorCode
 {
     VBA_RETURN_WITHOUT_SUB = 3,                 // Return without GoSub
     VBA_INVALID_PROCEDURE_CALL = 5,             // Invalid procedure call
@@ -73,8 +73,10 @@ enum VBAErrorCode
     VBA_FOR_NOT_INITIALIZED = 92,               // For loop not initialized
     VBA_INVALID_PATTERN = 93,                   // Invalid pattern string
     VBA_INVALID_USE_NULL = 94,                  // Invalid use of Null
-    VBA_CALL_FRIEND_ERROR = 97,                 // Can't call Friend procedure on an object that is not an instance of the defining class
-    VBA_INCLUDE_REFERENCE_ERROR = 98,           // A property or method call cannot include a reference to a private object, either as an argument or as a return value
+    VBA_CALL_FRIEND_ERROR = 97,                 // Can't call Friend procedure on an object that is
+                                                // not an instance of the defining class
+    VBA_INCLUDE_REFERENCE_ERROR = 98,           // A property or method call cannot include a reference
+                                                // to a private object, either as an argument or as a return value
     VBA_SYS_RESOURCE_DLL_LOAD_ERROR = 298,      // System resource or DLL could not be loaded
     VBA_INVALID_CHAR_DEVICE_NAME = 320,         // Can't use character device names in specified file names
     VBA_INVALID_FILE_FORMAT = 321,              // Invalid file format
@@ -91,7 +93,8 @@ enum VBAErrorCode
     VBA_CONTROL_SPECIFIED_NOT_FOUND = 363,      // Control specified not found
     VBA_OBJECT_UNLOADED = 364,                  // Object was unloaded
     VBA_UNLOAD_IN_CONTEXT_ERROR = 365,          // Unable to unload within this context
-    VBA_FILE_OUT_OF_DATE = 368,                 // The specified file is out of date. This program requires a later version
+    VBA_FILE_OUT_OF_DATE = 368,                 // The specified file is out of date.
+                                                // This program requires a later version
     VBA_OBJECT_NOT_OWNER = 371,                 // The specified object can't be used as an owner form for Show
     VBA_INVALID_PROPERTY_VALUE = 380,           // Invalid property value
     VBA_INVALID_PROPERTY_ARRAY_INDEX = 381,     // Invalid property-array index
@@ -113,7 +116,8 @@ enum VBAErrorCode
     VBA_AUTOMATION_NAME_NOT_FOUND = 432,        // File name or class name not found during Automation operation
     VBA_PROPETRY_METHOD_NOT_SUPPORT = 438,      // Object doesn't support this property or method
     VBA_AUTOMATION_ERROR = 440,                 // Automation error
-    VBA_LIBRARY_CONNECTION_LOST = 442,          // Connection to type library or object library for remote process has been lost
+    VBA_LIBRARY_CONNECTION_LOST = 442,          // Connection to type library or object library for
+                                                // remote process has been lost
     VBA_OBJECT_NOT_HAVE_DEFAULT_VALUE = 443,    // Automation object doesn't have a default value
     VBA_ACTION_NOT_SUPPORT = 445,               // Object doesn't support this action
     VBA_NAME_ARGS_NOT_SUPPORT = 446,            // Object doesn't support named arguments
@@ -137,7 +141,8 @@ enum VBAErrorCode
     VBA_INVALID_PICTURE = 481,                  // Invalid picture
     VBA_PRINTER_ERROR = 482,                    // Printer error
     VBA_PRINTER_PROPERTY_NOT_SUPPORT = 483,     // Printer driver does not support specified property
-    VBA_GET_PRINTER_INFORMATION_ERROR = 484,    // Problem getting printer information from the system. Make sure the printer is set up correctly
+    VBA_GET_PRINTER_INFORMATION_ERROR = 484,    // Problem getting printer information from the system.
+                                                // Make sure the printer is set up correctly
     VBA_INVALID_PICTURE_TYPE = 485,             // Invalid picture type
     VBA_FORM_IMAGE_PRINT_ERROR = 486,           // Can't print form image to this type of printer
     VBA_VARIABLE_UNDEFINED = 500,               // Variable is undefined
@@ -178,6 +183,39 @@ enum VBAErrorCode
     // 31029, 31033, 31035 = ???
 };
 
+enum VBA_E_ERRORS   // VBA internal HRESULT
+{
+    VBA_E_NOUSERACTION            = 0x800A9D15L,
+    VBA_E_NOTOBJECT               = 0x800A01A8L,
+    VBA_E_EXPECTEDFUNCNOTVAR      = 0x800A88CAL,
+    VBA_E_SYNTAX                  = 0x800A9C70L,
+    VBA_E_UNDEFINEDTYPE           = 0x800A8027L,
+    VBA_E_INVALIDPROCNAME         = 0x800A9C82L,
+    VBA_E_UNDEFINEDPROC           = 0x800A0023L,
+    VBA_E_CANTEXECCODEINBREAKMODE = 0x800ADF09L,
+    VBA_E_MACROSDISABLED          = 0x800ADF23L,
+    VBA_E_MODNAMECONFLICT         = 0x800A802DL,
+    VBA_E_INVALIDSTATE            = 0x800A8029L,
+    VBA_E_UNSUPFORMAT             = 0x800A8019L,
+    VBA_E_ALREADYRECORDING        = 0x800AC470L,
+    VBA_E_PROJECTPROTECTED        = 0x800AC471L,
+    VBA_E_EXCEPTION               = 0x800AC461L,
+    VBA_E_IGNORE                  = 0x800AC472L,
+    VBA_E_RESET                   = 0x800A9C68L,
+    VBA_E_CANTEXITDESIGNMODE      = 0x800ADF21L,
+    VBA_E_CANTCONTINUE            = 0x800A0011L,
+    VBA_E_MODULENOTFOUND          = 0x800A9C86L,
+    VBA_E_PROJECTNOTFOUND         = 0x800A9C87L,
+    VBA_E_COMPERRINHIDDENMODULE   = 0x800A9D09L,
+    VBA_E_RECORDMODCANTCHANGE     = 0x800A9D32L,
+    VBA_E_COMPILEERROR            = 0x800A9C64L,
+    VBA_E_ILLEGALNAME             = 0x800AC3D4L,
+    VBA_E_FILENOTFOUND            = 0x800A0035L,
+    VBA_E_PATHNOTFOUND            = 0x800A004CL,
+    VBA_E_CLASSNOTREG             = 0x800A02C9L,
+    VBA_E_COULDNTLOADFILE         = 0x800AC389L
+};
+
 enum VBA_Calendar
 {
     vbCalGreg = 0,  // Indicates that the Gregorian calendar is used.
@@ -186,22 +224,30 @@ enum VBA_Calendar
 
 enum VBA_CallType
 {
-    vbMethod = 1,   // Indicates that a method has been invoked.
-    vbGet = 2,      // Indicates a Property Get procedure.
-    vbLet = 4,      // Indicates a Property Let procedure.
-    vbSet = 8,      // Indicates a Property Set procedure.
+    vbMethod = 1,   // Indicates that a method has been invoked, = DISPATCH_METHOD
+    vbGet = 2,      // Indicates a Property Get procedure, = DISPATCH_PROPERTYGET
+    vbLet = 4,      // Indicates a Property Let procedure, = DISPATCH_PROPERTYPUT
+    vbSet = 8,      // Indicates a Property Set procedure, = DISPATCH_PROPERTYPUTREF
 };
 
 enum VBA_Color
 {
-    vbBlack   = 0x0,        // Black
-    vbRed     = 0xFF,       // Red
-    vbGreen   = 0xFF00,     // Green
-    vbYellow  = 0xFFFF,     // Yellow
-    vbBlue    = 0xFF0000,   // Blue
-    vbMagenta = 0xFF00FF,   // Magenta
-    vbCyan    = 0xFFFF00,   // Cyan
-    vbWhite   = 0xFFFFFF    // White
+    vbBlack         = 0x0,          // Black            [0]
+    vbBlue          = 0x800000,     // Blue             [1]
+    vbGreen         = 0x8000,       // Green            [2]
+    vbCyan          = 0x808000,     // Cyan             [3]
+    vbRed           = 0x80,         // Red              [4]
+    vbMagenta       = 0x800080,     // Magenta          [5]
+    vbYellow        = 0x8080,       // Yellow           [6]
+    vbWhite         = 0x0C0C0C0,    // White            [7]
+    vbGray          = 0x808080,     // Gray             [8]
+    vbLightBlue     = 0xFF0000,     // Light Blue       [9]
+    vbLightGreen    = 0xFF00,       // Light Green      [10]
+    vbLightCyan     = 0xFFFF00,     // Light Cyan       [11]
+    vbLightRed      = 0xFF,         // Light Red        [12]
+    vbLightMagenta  = 0xFF00FF,     // Light Magenta    [13]
+    vbLightYellow   = 0xFFFF,       // Light Yellow     [14]
+    vbBrightWhite   = 0xFFFFFF      // Bright White     [14]
 };
 
 enum VBA_Comparison
@@ -209,10 +255,11 @@ enum VBA_Comparison
     vbUseCompareOption = -1,    // Performs a comparison using the setting of the Option Compare statement.
     vbBinaryCompare = 0,        // Performs a binary comparison.
     vbTextCompare = 1,          // Performs a textual comparison.
-    vbDatabaseCompare = 2,      // For Microsoft Access (Windows only), performs a comparison based on information contained in your database.
+    vbDatabaseCompare = 2,      // For Microsoft Access (Windows only), performs a comparison based on
+                                // information contained in your database.
 };
 
-enum VBA_Date_FirstDayOfWeek
+enum VBA_FirstDayOfWeek
 {
     vbUseSystem = 0,    // Use NLS API setting.
     vbSunday = 1,       // Sunday (default)
@@ -224,24 +271,28 @@ enum VBA_Date_FirstDayOfWeek
     vbSaturday = 7,     // Saturday
 };
 
-enum VBA_Date_FirstDayOfYear
+enum VBA_FirstWeekOfYear
 {
-    VbUseSystemDayOfWeek = 0,   // Use the day of the week specified in your system settings for the first day of the week.
+    VbUseSystemDayOfWeek = 0,   // Use the day of the week specified in your system settings for the
+                                // first day of the week.
     VbFirstJan1 = 1,            // Start with week in which January 1 occurs (default).
     vbFirstFourDays = 2,        // Start with the first week that has at least four days in the new year.
     vbFirstFullWeek = 3,        // Start with the first full week of the year.
 };
 
-enum VBA_Date_Format
+enum VBA_DateFormat
 {
-    vbGeneralDate = 0,  // Display a date and/or time. For real numbers, display a data and time. If there is no fractional part, display only a date. If there is no integer part, display time only. Date and time display is determined by your system settings.
+    vbGeneralDate = 0,  // Display a date and/or time. For real numbers, display a data and time.
+                        // If there is no fractional part, display only a date.
+                        // If there is no integer part, display time only. Date and time display
+                        // is determined by your system settings.
     vbLongDate = 1,     // Display a date using the long date format specified in your computer's regional settings.
     vbShortDate = 2,    // Display a date using the short date format specified in your computer's regional settings.
     vbLongTime = 3,     // Display a time using the long time format specified in your computer's regional settings.
     vbShortTime = 4,    // Display a time using the short time format specified in your computer's regional settings.
 };
 
-enum VBA_Dir_Attr
+enum VBA_DirAttr
 {
     vbNormal = 0,       // Normal (default for Dir and SetAttr)
     vbReadOnly = 1,     // Read-only
@@ -256,11 +307,15 @@ enum VBA_Dir_Attr
 enum VBA_DriveType
 {
     _Unknown = 0,       // Drive type can't be determined.
-    Removable = 1,      // Drive has removable media. This includes all floppy drives and many other varieties of storage devices.
-    Fixed = 2,          // Drive has fixed (nonremovable) media. This includes all hard drives, including hard drives that are removable.
+    Removable = 1,      // Drive has removable media. This includes all floppy drives
+                        // and many other varieties of storage devices.
+    Fixed = 2,          // Drive has fixed (nonremovable) media. This includes all hard drives,
+                        // including hard drives that are removable.
     Remote = 3,         // Network drives. This includes drives shared anywhere on a network.
-    CDROM = 4,          // Drive is a CD-ROM. No distinction is made between read-only and read/write CD-ROM drives.
-    RAMDisk = 5,        // Drive is a block of Random Access Memory (RAM) on the local computer that behaves like a disk drive.
+    CDROM = 4,          // Drive is a CD-ROM. No distinction is made between read-only
+                        // and read/write CD-ROM drives.
+    RAMDisk = 5,        // Drive is a block of Random Access Memory (RAM) on the
+                        // local computer that behaves like a disk drive.
 };
 
 enum VBA_FileAttr
@@ -279,7 +334,8 @@ enum VBA_FileAttr
 enum VBA_FileIO
 {
     ForReading = 1,     // Open a file for reading only. You can't write to this file.
-    ForWriting = 2,     // Open a file for writing. If a file with the same name exists, its previous contents are overwritten.
+    ForWriting = 2,     // Open a file for writing. If a file with the same name exists,
+                        // its previous contents are overwritten.
     ForAppending = 8,   // Open a file and write to the end of the file.
 };
 
@@ -436,10 +492,11 @@ enum VBA_MsgBox_Args
     vbMsgBoxHelpButton = 16384,     // Adds Help button to the message box
     VbMsgBoxSetForeground = 65536,  // Specifies the message box window as the foreground window
     vbMsgBoxRight = 524288,         // Text is right aligned
-    vbMsgBoxRtlReading = 1048576,   // Specifies text should appear as right-to-left reading on Hebrew and Arabic systems
+    vbMsgBoxRtlReading = 1048576,   // Specifies text should appear as right-to-left reading
+                                    // on Hebrew and Arabic systems
 };
 
-enum VBA_MsgBox_Return
+enum VBA_MsgBox_Result
 {
     vbOK = 1,                   // OK button pressed
     vbCancel = 2,               // Cancel button pressed
@@ -458,13 +515,14 @@ enum VBA_QueryClose
     vbAppTaskManager = 3,       // The Windows Task Manager is closing the application.
 };
 
-enum VBA_Shell
+enum VBA_AppWinStyle
 {
     vbHide = 0,                 // Window is hidden and focus is passed to the hidden window.
     vbNormalFocus = 1,          // Window has focus and is restored to its original size and position.
     vbMinimizedFocus = 2,       // Window is displayed as an icon with focus.
     vbMaximizedFocus = 3,       // Window is maximized with focus.
-    vbNormalNoFocus = 4,        // Window is restored to its most recent size and position. The currently active window remains active.
+    vbNormalNoFocus = 4,        // Window is restored to its most recent size and position.
+                                // The currently active window remains active.
     vbMinimizedNoFocus = 6,     // Window is displayed as an icon. The currently active window remains active.
 };
 
@@ -472,7 +530,8 @@ enum VBA_SpecialFolder
 {
     WindowsFolder = 0,          // The Windows folder contains files installed by the Windows operating system.
     SystemFolder = 1,           // The System folder contains libraries, fonts, and device drivers.
-    TemporaryFolder = 2,        // The Temp folder is used to store temporary files. Its path is found in the TMP environment variable.
+    TemporaryFolder = 2,        // The Temp folder is used to store temporary files.
+                                // Its path is found in the TMP environment variable.
 };
 
 enum VBA_StrConv
@@ -480,12 +539,18 @@ enum VBA_StrConv
     vbUpperCase = 1,            // Converts the string to uppercase characters.
     vbLowerCase = 2,            // Converts the string to lowercase characters.
     vbProperCase = 3,           // Converts the first letter of every word in string to uppercase.
-    vbWide = 4,                 // Converts narrow (single-byte) characters in string to wide (double-byte) characters. Applies to East Asia locales.
-    vbNarrow = 8,               // Converts wide (double-byte) characters in string to narrow (single-byte) characters. Applies to East Asia locales.
-    vbKatakana = 16,            // Converts Hiragana characters in string to Katakana characters. Applies to Japan only.
-    vbHiragana = 32,            // Converts Katakana characters in string to Hiragana characters. Applies to Japan only.
-    vbUnicode = 64,             // Converts the string to Unicode using the default code page of the system. (Not available on the Macintosh.)
-    vbFromUnicode = 128,        // Converts the string from Unicode to the default code page of the system. (Not available on the Macintosh.)
+    vbWide = 4,                 // Converts narrow (single-byte) characters in string to wide (double-byte) characters.
+                                // Applies to East Asia locales.
+    vbNarrow = 8,               // Converts wide (double-byte) characters in string to narrow (single-byte) characters.
+                                // Applies to East Asia locales.
+    vbKatakana = 16,            // Converts Hiragana characters in string to Katakana characters.
+                                // Applies to Japan only.
+    vbHiragana = 32,            // Converts Katakana characters in string to Hiragana characters.
+                                // Applies to Japan only.
+    vbUnicode = 64,             // Converts the string to Unicode using the default code page of the system.
+                                // Not available on the Macintosh.
+    vbFromUnicode = 128,        // Converts the string from Unicode to the default code page of the system.
+                                // Not available on the Macintosh.
 };
 
 enum VBA_SystemColor
@@ -559,13 +624,15 @@ typedef VARIANT_BOOL VBA_Boolean;
 // Integer: stored as 16-bit (2-byte) numbers ranging in value from -32,768 to 32,767, VT_I2
 typedef SHORT VBA_Integer;
 
-// Long: stored as signed 32-bit (4-byte) numbers ranging in value from -2,147,483,648 to 2,147,483,647; VT_I4
+// Long: stored as signed 32-bit (4-byte) numbers ranging in value
+// from -2,147,483,648 to 2,147,483,647; VT_I4
 typedef LONG VBA_Long;
 
 #if defined(_WIN64)
-    // LongLong: stored as signed 64-bit (8-byte) numbers ranging in value from -9,223,372,036,854,775,808 to 9,223,372,036,854,775,807,
+    // LongLong: stored as signed 64-bit (8-byte) numbers ranging in value
+    // from -9,223,372,036,854,775,808 to 9,223,372,036,854,775,807,
     // only on 64-bit platforms
-    typedef QWORD VBA_LongLong;
+    typedef UINT64 VBA_LongLong;
     typedef VBA_LongLong VBA_LongPtr;
 #else
     typedef LONG VBA_LongPtr;
@@ -577,9 +644,10 @@ typedef FLOAT VBA_Single;
 // Double: stored as IEEE 64-bit (8-byte) floating-point numbers, VT_R8
 typedef DOUBLE VBA_Double;
 
-// Currency: stored as 64-bit (8-byte) numbers in an integer format, scaled by 10,000 to give a fixed-point number
-// with 15 digits to the left of the decimal point and 4 digits to the right, VT_CY
-typedef CURRENCY VBA_Currency;  // = CY struct
+// Currency: stored as 64-bit (8-byte) numbers in an integer format, scaled by 10,000 to give
+// a fixed-point number with 15 digits to the left of the decimal point and 4 digits to the right,
+// VT_CY
+typedef CURRENCY VBA_Currency;  // = CY/tagCY struct
 
 // Decimal: stored as signed 128-bit (16-byte) values representing 96-bit (12-byte) integer numbers scaled by a
 // variable power of 10. The scaling factor specifies the number of digits to the right of the decimal point;
@@ -604,7 +672,7 @@ typedef VARIANT VBA_Variant;
 // Array: SAFEARRAY *, VT_ARRAY
 typedef LPSAFEARRAY VBA_Array;
 
-// User define type (UDT): stored as a VARIANT with vt = VT_RECORD and __tagBRECORD date member
+// User define type (UDT): stored as a VARIANT with vt = VT_RECORD and __tagBRECORD data member
 typedef VARIANT VBA_Record;
 
 #pragma pack(push, 8)
@@ -613,14 +681,14 @@ typedef VARIANT VBA_Record;
 
 // DllFunctionCall structs
 //
-typedef struct _epiDllTemplateInfo
+typedef struct __epiDllTemplateInfo
 {
     DWORD dwErrCode;
     HMODULE hModule;
     FARPROC pFunction;
 } epiDllTemplateInfo;
 
-typedef struct _serDllTemplate
+typedef struct __serDllTemplate
 {
     LPCSTR pszModuleName;   // Dll name
     LPCSTR pszFunctionName; // Function name
@@ -637,23 +705,229 @@ struct ERRMSG
     DWORD m_dw2;
 };
 
-struct ERRINFO
+type struct tagEXCEPINFO
 {
-    LPSTR pszErrMsg;
-    DWORD m_dw1;
-    DWORD m_dw2;
-    DWORD m_dw3;
-    DWORD m_dw4;
-};
+    WORD wCode;
+    WORD wReserved;
+    BSTR bstrSource;
+    BSTR bstrDescription;
+    BSTR bstrHelpFile;
+    DWORD dwHelpContext;
+    PVOID pvReserved;
+    HRESULT (__stdcall *pfnDeferredFillIn)(tagEXCEPINFO *);
+    SCODE scode;
+} EXCEPINFO, *PEXCEPINFO, *LPEXCEPINFO;
 
 #pragma pack(pop)
 
 //
-// VB/VBA export functions
+// VBA export functions, sort follow export oridinal number
+// With functions return a pointer to VARIANT, the return value also is the first, destination argument
+// BSTR = LPCOLESTR = OLECHAR * = wchar_t *
+// void function = VBA statement, can throw exception with exception code in VBA_ErrorCode enum
 //
 
-#define VBIMP __declspec(dllimport)
+#define VBAPI   __declspec(dllimport) __stdcall
+#define VBAPI_C __declspec(dllimport) __cdecl
+#define VBAPI_F __declspec(dllimport) __fastcall    // fastcall of MS, e/rcx, e/rdx
 
+VBAPI BSTR          rtcLeftBstr(BSTR bstrIn, int nCount);
+VBAPI LPVARIANT     rtcLeftVar(LPVARIANT pvarDest, LPVARIANT pvarSrc, int nCount);
+VBAPI BSTR          rtcRightBstr(BSTR bstrIn, int nCount);
+VBAPI LPVARIANT     rtcRightVar(LPVARIANT pvarDest, LPVARIANT pvarSrc, int nCount);
+VBAPI wchar_t       rtcAnsiValueBstr(BSTR bstrIn);
+VBAPI BSTR          rtcLowerCaseBstr(BSTR bstrIn);
+VBAPI LPVARIANT     rtcLowerCaseVar(LPVARIANT pvarDest, LPVARIANT pvarSrc);
+VBAPI BSTR          rtcTrimBstr(BSTR bstrIn);
+VBAPI LPVARIANT     rtcTrimVar(LPVARIANT pvarDest, LPVARIANT pvarSrc);
+VBAPI BSTR          rtcLeftTrimBstr(BSTR strIn);
+VBAPI LPVARIANT     rtcLeftTrimVar(LPVARIANT pvarDest, LPVARIANT pvarSrc);
+VBAPI BSTR          rtcRightTrimBstr(BSTR bstrIn);
+VBAPI LPVARIANT     rtcRightTrimVar(LPVARIANT pvarDest, LPVARIANT pvarSrc);
+VBAPI BSTR          rtcSpaceBstr(int nCount);
+VBAPI LPVARIANT     rtcSpaceVar(LPVARIANT pvarDest, int nCount);
+VBAPI BSTR          rtcUpperCaseBstr(BSTR bstrIn);
+VBAPI LPVARIANT     rtcUpperCaseVar(LPVARIANT pvarDest, LPVARIANT pvarSrc);
+VBAPI void          rtcKillFiles(LPVARIANT pvarFileIn);     // = VBA Kill
+VBAPI int           rtcChangeDir(LPCWSTR pwszToDir);        // = VBA ChDrive
+VBAPI void          rtcMakeDir(LPCWSTR pwszDirMake);        // = VBA MkDir
+VBAPI void          rtcRemoveDir(LPCWSTR pwszDirRemove);    // = VBA RmDir
+VBAPI void          rtcChangeDrive(BSTR bstrToDrive);       // = VBA ChDrive
+VBAPI void          Beep();                                 // = VBA Beep
+VBAPI double        rtcGetTimer();                          // = VBA Timer
+VBAPI BSTR          rtcStrFromVar(LPVARIANT pvarIn);
+VBAPI BSTR          rtcBstrFromAnsi(int nCharOrd);
+VBAPI LPVARIANT     rtcPackDate(LPVARIANT pvarDest, WORD wYear, WORD wMonth, WORD wDay);    // = VBA Date
+VBAPI LPVARIANT     rtcPackTime(LPVARIANT pvarOut, WORD wHour, WORD wMinute, WORD wSecond); // = VBA Time
+VBAPI LPVARIANT     rtcGetDateValue(LPVARIANT pvarDest, BSTR bstrIn);
+VBAPI LPVARIANT     rtcGetTimeValue(LPVARIANT pvarDest, BSTR strIn);
+VBAPI LPVARIANT     rtcGetDayOfMonth(LPVARIANT pvarDest, LPVARIANT pvarSource);
+VBAPI LPVARIANT     rtcGetHourOfDay(LPVARIANT pvarDest, LPVARIANT pvarSource);
+VBAPI LPVARIANT     rtcGetMinuteOfHour(LPVARIANT pvarDest, LPVARIANT pvarSource);
+VBAPI LPVARIANT     rtcGetMonthOfYear(LPVARIANT pvarDest, LPVARIANT pvarSource);
+VBAPI LPVARIANT     rtcGetPresentDate(LPVARIANT pvarOut);
+VBAPI LPVARIANT     rtcGetSecondOfMinute(LPVARIANT pvarDest, LPVARIANT pvarSource);
+VBAPI void          rtcSetDateVar(LPVARIANT pvarNewDate);
+VBAPI int           rtcSetDateBstr(LPCWSTR pwszDate);
+VBAPI void          rtcSetTimeVar(LPVARIANT pvarIn);
+VBAPI void          rtcSetTimeBstr(LPCWSTR pwszNewTime);
+VBAPI LPVARIANT     rtcGetDayOfWeek(LPVARIANT pvarDest, LPVARIANT pvarSource, int nDayOfWeek);
+VBAPI LPVARIANT     rtcGetYear(LPVARIANT pvarDest, LPVARIANT pvarSource);
+VBAPI void          rtcFileReset();
+VBAPI int           rtcFileAttributes(SHORT sFileNum, SHORT sMode);
+VBAPI VARIANT_BOOL  rtcIsArray(LPVARIANT pvarIn);
+VBAPI VARIANT_BOOL  rtcIsDate(LPVARIANT pvarIn);
+VBAPI VARIANT_BOOL  rtcIsEmpty(LPVARIANT pvarIn);
+VBAPI VARIANT_BOOL  rtcIsError(LPVARIANT pvarIn);
+VBAPI VARIANT_BOOL  rtIsNull(LPVARIANT pvarIn);
+VBAPI VARIANT_BOOL  rtcIsNumeric(LPVARIANT pvarIn);
+VBAPI VARIANT_BOOL  rtcIsObject(LPVARIANT pvarIn);
+VBAPI VARTYPE       rtcVarType(LPVARIANT pvarIn);   // VARTYPE = WORD
+VBAPI void          rtcFileWidth(SHORT sFileNum, SHORT sFileWidth);
+VBAPI BSTR          rtcInputCount(int cbToRead, int nFileNum);  // return a BSTR Ansi
+VBAPI LPVARIANT     rtcInputCountVar(LPVARIANT pvarOut, int cbToRead, int nFileNum); // return Variant of BSTR ANSI
+VBAPI int           rtcFileSeek(SHORT sFileNum);    // return current file offset
+VBAPI int           rtcFileLocation(SHORT sFileNum);
+VBAPI int           rtcFileLength(int nFileNum);
+VBAPI VARIANT_BOOL  rtcEndOfFile(SHORT sFileNum);
+VBAPI BSTR          rtcHexBstrFromVar(LPVARIANT pvarIn);
+VBAPI LPVARIANT     rtcHexVarFromVar(LPVARIANT pvarDest, LPVARIANT pvarSource);
+VBAPI BSTR          rtcOctBstrFromVar(LPVARIANT pvarIn);
+VBAPI LPVARIANT     rtcOctVarFromVar(LPVARIANT pvarDest, LPVARIANT pvarSource);
+VBAPI VBA_ErrorCode rtcFileCopy(BSTR bstrFileSource, BSTR bstrFileDest);
+VBAPI LPVARIANT     rtcFileDateTime(LPVARIANT pvarOut, BSTR bstrFilePath);
+VBAPI DWORD         rtcFileLen(BSTR bstrFilePath);
+VBAPI DWORD         rtcGetFileAttr(BSTR bstrFilePath);
+VBAPI void          rtcSetFileAttr(BSTR bstrFilePath, DWORD dwFileAttr);
+VBAPI double        rtcR8ValFromBstr(BSTR bstrIn);
+VBAPI long double   rtcSin(double dblIn);
+VBAPI long double   rtcCos(double dblIn);
+VBAPI long double   rtcTan(double dblIn);
+VBAPI long double   rtcAtn(double dblIn);
+VBAPI long double   rtcLog(double dblIn);
+VBAPI DWORD         rtcRgb(WORD wRed, WORD wGreen, WORD wBlue);
+VBAPI VBA_Color     rtcQBColor(WORD idxColor);
+VBAPI DWORD         rtcMacId(BSTR bstrIn);
+VBAPI BSTR          rtcTypeName(LPVARIANT pvarIn);
+VBAPI float         rtcRandomNext(LPVARIANT pvarIn);
+VBAPI void          rtcRandomize(LPVARIANT pvarIn);
+VBAPI LPVARIANT     rtcMsgBox(LPVARIANT pvarPrompt, VBA_MsgBox_Args nButtons, LPVARIANT pvarTitle,
+                              LPVARIANT pvarHelpFile, LPVARIANT pvarContext);
+VBAPI LPVARIANT     rtcInputBox(LPVARIANT pvarPrompt, LPVARIANT pvarTitle, LPVARIANT pvarDefault,
+                                LPVARIANT pvarXPos, LPVARIANT pvarYPos,
+                                LPVARIANT pvarHelpFile, LPVARIANT pvarContext);
+VBAPI void          rtcAppActivate(LPVARIANT pvarTitle, LPVARIANT pvarWait);
+VBAPI void          rtcDoEvents();
+VBAPI void          rtcSendKeys(BSTR bstrKeys, LPVARIANT pvarWait);
+VBAPI DWORD         rtcShell(LPVARIANT pvarAppPath, VBA_AppWinStyle nWindowStyle);  // return Process ID
+VBAPI LPVARIANT     rtcArray(LPVARIANT pvarDest, LPSAFEARRAY *ppsaSource);
+VBAPI HRESULT       DLLGetDocumentation(ITypeLib *ptlib, ITypeInfo *ptinfo, LCID lcid,
+                                        DWORD dwHelpStringContext, BSTR *pbstrHelpString);
+VBAPI int           rtcGetErl();
+VBAPI BSTR          rtcStringBstr(int nLen, LPVARIANT pvarChar); // = VBA String$ function
+VBAPI LPVARIANT     rtcStringVar(LPVARIANT pvarResult, int nLen, LPVARIANT pvarChar);  // = VBA String function
+VBAPI LPVARIANT     rtcVarBstrFromAnsi(LPVARIANT pvarResult, int nCharOrd);
+VBAPI BSTR          rtcGetDateBstr();                       // = VBA Date$ function
+VBAPI LPVARIANT     rtcGetDateVar(LPVARIANT pvarResult);    // = VBA Date function
+VBAPI BSTR          rtcGetTimeBstr();                       // = VBA Time$ function
+VBAPI LPVARIANT     rtcGetTimeVar(LPVARIANT pvarResult);    //  = VBA Time function
+VBAPI LPVARIANT     rtcVarStrFromVar(LPVARIANT pvarDest, LPVARIANT pvarSource);
+VBAPI long double   rtcSqr(double dblIn);
+VBAPI VBA_IMEStatus rtcIMEStatus();
+VBAPI BSTR          rtcLeftCharBstr(BSTR bstrIn, int nCount);
+VBAPI LPVARIANT     rtcLeftCharVar(LPVARIANT pvarDest, LPVARIANT pvarSrc, int nCount);
+VBAPI BSTR          rtcRightCharBstr(BSTR bstrSrc, int nCount);  // = VBA RightB function
+VBAPI LPVARIANT     rtcRightCharVar(LPVARIANT pvarDest, LPVARIANT pvarSource, int nCount);  // = VBA Right function
+VBAPI BSTR          rtcInputCharCount(int cchToRead, int nFileNum);
+VBAPI LPVARIANT     rtcStrConvVar(LPVARIANT pvarDest, LPVARIANT pvarSource, VBA_StrConv nConversion);   // = VBA StrConv function
+VBAPI LCID          rtcGetHostLCID();
+VBAPI LPVARIANT     rtcCreateObject(LPVARIANT pvarResult, int nUnused);
+VBAPI void          rtcAppleScript(int nUnused);
+VBAPI BSTR          rtcMidBstr(BSTR bstrIn, int nLen, LPVARIANT pvarStart);  // = VBA MidB
+VBAPI LPVARIANT     rtcMidVar(LPVARIANT pvarDest, LPVARIANT pvarSource, int nLen, LPVARIANT pvarStart); // = VBA Mid function
+VBAPI LPVARIANT     rtcInStr(LPVARIANT pvarDest, LPVARIANT pvarSource, LPVARIANT pvarSearch, LPVARIANT pvarStart);  // = VBA InStrB
+VBAPI BSTR          rtcMidCharBstr(BSTR bstrIn, int nLen, LPVARIANT pvarStart); // = VBA Mid$
+VBAPI LPVARIANT     rtcMidCharVar(LPVARIANT pvarDest, LPVARIANT pvarSource, int nLen, LPVARIANT pvarStart); // = VBA Mid
+
+VBAPI LPVARIANT     rtcInStrChar(LPVARIANT pvarDest, LPVARIANT pvarSource, LPVARIANT pvarSearch,
+                                 LPVARIANT pvarStart, VBA_Comparison nCompare); // = VBA InStr
+
+VBAPI BSTR          rtBstrFromErrVar(LPVARIANT pvarErr);
+VBAPI VARIANT_BOOL  rtBoolFromErrVar(LPVARIANT pvarErr);
+VBAPI CURRENCY      rtCyFromErrVar(LPVARIANT pvarErr);
+VBAPI SHORT         rtI2FromErrVar(LPVARIANT pvarErr);
+VBAPI int           rtI4FromErrVar(LPVARIANT pvarErr);
+VBAPI float         rtR4FromErrVar(LPVARIANT pvarErr);
+VBAPI double        rtR8FromErrVar(LPVARIANT pvarErr);
+VBAPI DATE          rtcDateFromVar(LPVARIANT pvarIn);
+VBAPI LPVARIANT     rtcVarFromVar(LPVARIANT pvarDest, LPVARIANT pvarErr);
+VBAPI LPVARIANT     rtcCVErrFromVar(LPVARIANT pvarDest, LPVARIANT pvarErr);
+
+VBAPI LPVOID        VarPtr(LPVOID lpvIn);    // return lpvIn
+VBAPI BSTR          rtcDir(LPVARIANT pvarPathName, VBA_DirAttr nAttr);          // = VBA Dir function
+VBAPI BSTR          rtcCurrentDirBstr(LPVARIANT pvarDrive);                     // = VBA CurDir$ function
+VBAPI LPVARIANT     rtcCurrentDir(LPVARIANT pvarResult, LPVARIANT pvarDrive);   // = VBA CurDir function
+VBAPI SHORT         rtcFreeFile(LPVARIANT pvarRangeNumber);                     // = VBA FreeFile function
+
+// = VBA StrComp function -> rtcCompareBstr
+VBAPI LPVARIANT     rtcCompareBstr(LPVARIANT pvarDest, LPVARIANT pvarLeft, LPVARIANT pvarRight,
+                                   VBA_Comparison nCompare);
+
+// = VBA Format$ function -> rtcBstrFromFormatVar
+VBAPI BSTR          rtcBstrFromFormatVar(LPVARIANT pvarIn, LPVARIANT pvarFormat,
+                                         VBA_FirstDayOfWeek iFirstDay, VBA_FirstWeekOfYear iFirstWeek);
+VBAPI BSTR          rtcBstrFromError(LPVARIANT pvarErr);
+VBAPI LPVARIANT     rtcVarFromError(LPVARIANT pvarResult, LPVARIANT pvarErr);
+
+VBAPI LPVARIANT     rtcLenCharVar(LPVARIANT pvarDest, LPVARIANT pvarSource);    // = VBA Len function
+VBAPI LPVARIANT     rtcLenVar(LPVARIANT pvarDest, LPVARIANT pvarSource);        // = VBA LenB function
+VBAPI LPVARIANT     rtcFixVar(LPVARIANT pvarDest, LPVARIANT pvarSource);        // = VBA Fix function
+VBAPI LPVARIANT     rtcAbsVar(LPVARIANT pvarDest, LPVARIANT pvarSource);        // = VBA Abs function
+VBAPI LPVARIANT     rtcIntVar(LPVARIANT pvarDest, LPVARIANT pvarSource);        // = VBA Int function
+VBAPI LPVARIANT     rtcSgnVar(LPVARIANT pvarDest, LPVARIANT pvarSource);        // = VBA Sng function
+
+// VBA Format function -> rtcVarFromFormatVar
+VBAPI LPVARIANT     rtcVarFromFormatVar(LPVARIANT pvarResult, LPVARIANT pvarIn, LPVARIANT pvarFormat,
+                                        VBA_FirstDayOfWeek iFirstDay, VBA_FirstWeekOfYear iFirstWeek);
+
+// VBA DateAdd function -> rtcDateAdd
+VBAPI LPVARIANT     rtcDateAdd(LPVARIANT pvarResult, BSTR bstrInterval,
+                               double dblNumber, LPVARIANT pvarDate);
+
+// VBA DateDiff function -> rctDateDiff
+VBAPI LPVARIANT     rtcDateDiff(LPVARIANT pvarResult, BSTR bstrInterval,
+                                LPVARIANT pvarDate1, LPVARIANT pvarDate2,
+                                VBA_FirstDayOfWeek iFirstDay, VBA_FirstWeekOfYear iFirstWeek);
+
+// VBA DatePart function -> rtcDatePart
+VBAPI LPVARIANT     rtcDatePart(LPVARIANT pvarResult, BSTR bstrInterval, LPVARIANT pvarDate,
+                                VBA_FirstDayOfWeek iFirstDay, VBA_FirstWeekOfYear iFirstWeek);
+
+// VBA Partition function -> rtcPartition
+VBAPI LPVARIANT     rtcPartition(LPVARIANT pvarResult, LPVARIANT pvarNumber, LPVARIANT pvarStart,
+                                 LPVARIANT pvarStop, LPVARIANT pvarInterval);
+
+// VBA Choose function -> rtcChoose
+VBAPI LPVARIANT     rtcChoose(LPVARIANT pvarResult, LONG nIndex, LPSAFEARRAY *ppsaChoices);
+
+// VBA Environ function  -> rtcEnvironVar
+VBAPI LPVARIANT     rtcEnvironVar(LPVARIANT pvarResult, LPVARIANT pvarEnvStrOrIdx);
+
+// VBA Environ$ -> rtcEnvironBstr
+VBAPI BSTR          rtcEnvironBstr(LPVARIANT pvarEnvStrOrIdx);
+
+// VBA Switch function -> rtcSwitch
+VBAPI LPVARIANT     rtcSwitch(LPVARIANT pvarResult, LPSAFEARRAY *ppsaExpressions);
+
+VBAPI BSTR          rtcCommandBstr();                       // VBA Command$ function
+VBAPI LPVARIANT     rtcCommandVar(LPVARIANT pvarResult);    // VBA Command function
+
+// Some internal functions in VBA VBExxx.dll
+void        __fastcall  __vbaFreeVar(LPVARIANT pvar);
+LPVARIANT   __stdcall   __vbaVarDateVar(LPVARIANT pvargDest, LPVARIANT pvaSource);
+DOUBLE      __stdcall   __vbaDateVar(LPVARIANT pvar);
+
+// to be continues, còn nhiều nắm nắm nuôn  ;)
 
 #ifdef __cplusplus
 }   // extern "C"
